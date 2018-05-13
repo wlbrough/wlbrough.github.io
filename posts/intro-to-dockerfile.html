@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Quick Intro to Dockerfile | Bill Broughton</title>
+        <meta name="author" content="Bill Broughton" />
+        <meta name="copyright" content="&copy; Bill Broughton 2016">
+        <meta name="description" content="My personal website for projects and writing.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <meta property="og:description" content="My personal website for projects and writing." />
+        <meta property="og:url" content="http://www.billbroughton.me" />
+        <meta property="og:site_name" content="Bill Broughton" />
+        <meta property="og:title" content="Bill Broughton" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="http://www.billbroughton.me/assets/img/avatar.jpg" />
+        <meta property="og:image:type" content="image/jpg" />
+        <meta property="og:image:width" content="400" />
+        <meta property="og:image:height" content="400" />
+
+        <!-- Twitter: card tags -->
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@billtechspring" />
+        <meta name="twitter:title" content="Bill Broughton">
+        <meta name="twitter:description" content="My personal website for projects and writing.">
+        <meta name="twitter:image" content="http://www.billbroughton.me/assets/img/avatar.jpg">
+
+        <!-- Open Source Protocol -->
+        <link rel="profile" href="http://osprotocol.com" />
+        <meta property="os:repo" content="https://github.com/wlbrough/wlbrough.github.io" />
+        <meta property="os:rcs_type" content="git" />
+        <meta property="os:src" content="git@github.com:wlbrough/wlbrough.github.io.git" />
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        
+          <link  rel="stylesheet" href="/vendor/siimple/dist/siimple.css" /><link  rel="stylesheet" href="/assets/scss/2f3066c3ccee07f1a21323950cd14459df813c8e.css" /><link  rel="stylesheet" href="/vendor/highlightjs/styles/default.css" />
+        
+
+    </head>
+    <body>
+        <div class="grid">
+          <div class="row">
+            <div class="col-12">
+              <a href="/"><h1>Bill Broughton</h1></a>
+              
+              <div class="social-media">
+                <a href="https://www.github.com/wlbrough" rel="me"><span class="icon-github"><span class="sr-only">Github</span></span></a>
+                <a href="https://www.twitter.com/#!/billtechspring" rel="me"><span class="icon-twitter"><span class="sr-only">Twitter</span></span></a>
+                <a href="https://medium.com/@bill_broughton"><span class="icon-medium"><span class="sr-only">Medium</span></span></a>
+                <a href="https://www.reddit.com/user/techspring/"><span class="icon-reddit"><span class="sr-only">Reddit</span></span></a>
+                <a href="https://getpocket.com/@a81pbTh7A582bdbz41gx600gItdaAbTS14eY8dhd86X5dSZ4dt576R15E00aK66a"><span class="icon-get-pocket"><span class="sr-only">Pocket</span></span></a>
+                <a href="https://open.spotify.com/user/1217545367"><span class="icon-spotify"><span class="sr-only">Spotify</span></span></a>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <div class="post" role="article">
+  <h2 class="post-title">Quick Intro to Dockerfile</h2>
+  <h6 class="post-date">1/29/2016</h6>
+
+  <p>For a while I was using VirtualBox/Vagrant for development projects. More
+recently I’ve moved to using Docker. I use Linux (lubuntu) on my dev computer
+anyways, so it was an easy transition and the resource consumption is
+significantly lower. I haven’t tried Docker in a Windows or Mac environment, so
+I can’t speak to the performance or resource consumption on those platforms.</p>
+<p>Docker is actually pretty straightforward to use. The one thing that I got hung
+up on was the Dockerfile. It’s not very complex, but you do need to know what
+you’re doing.</p>
+<p>I’m working on a Meteor project right now, so I wanted to create a new
+Dockerfile to make future projects quick to spin up. I’ll walk through each part
+of the Dockerfile and explain what’s going on. Bolded lines are the commands in
+the Dockerfile and the following text explains what the command is doing.</p>
+<p>There is a <a href="https://github.com/techspringllc/docker-meteor">Github repo</a> and a
+<a href="https://hub.docker.com/r/techspring/meteor-dev/">Docker Hub</a> page for this
+Docker image.</p>
+<pre><code class="lang-Dockerfile">FROM ubuntu
+</code></pre>
+<p>For this project I want to use the latest ubuntu base image. If I wanted to use
+a specific version, like 14.04, I would use the command “FROM ubuntu:14.04”. You
+can use any image from <a href="https://hub.docker.com/explore/">Docker Hub</a> as your
+base.</p>
+<pre><code class="lang-Dockerfile">MAINTAINER Bill Broughton &lt;email redacted&gt;
+</code></pre>
+<p>The MAINTAINER command isn’t strictly necessary, but if you are going to publish
+your image to Docker Hub it should be in your file. This just identifies who is
+maintaining the image.</p>
+<pre><code class="lang-Dockerfile">RUN &lt;shell command&gt;
+</code></pre>
+<p>RUN allows you to execute shell commands during the image creation. This is most
+frequently used for ‘apt-get install’ commands, but it can be used for other
+shell commands also.</p>
+<p>My Dockerfile has three RUN commands.</p>
+<pre><code class="lang-Dockerfile"># Fix MongoDB locale issue
+RUN locale-gen en_US.UTF-8
+
+# Update apt and install git, curl, python, and latest node
+RUN apt-get update &amp;&amp; apt-get install -y \
+  git \
+  curl \
+  python \
+  &amp;&amp; (curl https://deb.nodesource.com/setup | sh) \
+  &amp;&amp; apt-get install -y nodejs \
+  &amp;&amp; apt-get clean \
+  &amp;&amp; rm -rf /var/lib/apt/lists/*
+
+# Install Meteor
+RUN curl https://install.meteor.com/ |sh
+</code></pre>
+<p>The first RUN command sets the locale in Ubuntu. This is necessary because
+MongoDB won’t work without having a locale set. The next RUN command installs
+git, curl, python, and nodejs. It then clears the apt-cache and deletes the
+contents of the apt lists directory. These steps are part of Docker’s best
+practices and helps to keep image size down. Finally, the last RUN command
+installs <a href="https://www.meteor.com/install">Meteor</a> per the directions on their
+site.</p>
+<pre><code class="lang-Dockerfile">EXPOSE 3000
+</code></pre>
+<p>The default port that Meteor runs on in development is 3000, this command lets
+the container know to watch for connections to port 3000.</p>
+<pre><code class="lang-Dockerfile">VOLUME [“/app”]
+</code></pre>
+<p>VOLUME exposes directories to the container. Generally, you will want to expose
+any directories that are intended to be user-serviceable.</p>
+<pre><code class="lang-Dockerfile">WORKDIR /app
+</code></pre>
+<p>This sets the working directory to the volume that was exposed in the previous
+command. When you enter the interactive shell of the container, you will be
+located in /app.</p>
+<pre><code class="lang-Dockerfile">CMD [“/bin/bash”]
+</code></pre>
+<p>The CMD command can be used to execute shell scripts in the container. In a
+production application, this would be used to start the application with the
+container. In a development environment, users of the image probably want to go
+to the interactive shell. When the container is started with the ‘-it’ flag,
+they will be taken to an interactive shell.</p>
+<h3 id="how-to-use-it">How to use it</h3>
+<p>To build an image from the Dockerfile, run the following command from the
+directory containing the Dockerfile:</p>
+<pre><code class="lang-bash">docker build -t &lt;image-name&gt; .
+</code></pre>
+<p>The ‘-t’ flag allows you to give the image an easy to remember name rather than
+a hash. The period at the end references the current working directory. You can
+also build an image not in your current working directory by specifying a full
+path instead.</p>
+<p>To start the image in a new container, link the /app directory in the container
+to your current working directory on your host, and start an interactive shell,
+use this:</p>
+<pre><code class="lang-bash">docker run -it --name &lt;container-name&gt; -v &quot;$(pwd)&quot;:/app &lt;image-name&gt;
+</code></pre>
+
+</div>
+            </div>
+          </div>
+        </div>
+
+        
+          <script defer="defer"  src="/vendor/highlightjs/highlight.pack.js"></script>
+        
+
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-74342109-3', 'auto');
+          ga('send', 'pageview');
+        </script>
+    </body>
+</html>

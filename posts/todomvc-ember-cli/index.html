@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>TodoMVC in ember-cli | Bill Broughton</title>
+        <meta name="author" content="Bill Broughton" />
+        <meta name="copyright" content="&copy; Bill Broughton 2016">
+        <meta name="description" content="My personal website for projects and writing.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <meta property="og:description" content="My personal website for projects and writing." />
+        <meta property="og:url" content="http://www.billbroughton.me" />
+        <meta property="og:site_name" content="Bill Broughton" />
+        <meta property="og:title" content="Bill Broughton" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="http://www.billbroughton.me/assets/img/avatar.jpg" />
+        <meta property="og:image:type" content="image/jpg" />
+        <meta property="og:image:width" content="400" />
+        <meta property="og:image:height" content="400" />
+
+        <!-- Twitter: card tags -->
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@billtechspring" />
+        <meta name="twitter:title" content="Bill Broughton">
+        <meta name="twitter:description" content="My personal website for projects and writing.">
+        <meta name="twitter:image" content="http://www.billbroughton.me/assets/img/avatar.jpg">
+
+        <!-- Open Source Protocol -->
+        <link rel="profile" href="http://osprotocol.com" />
+        <meta property="os:repo" content="https://github.com/wlbrough/wlbrough.github.io" />
+        <meta property="os:rcs_type" content="git" />
+        <meta property="os:src" content="git@github.com:wlbrough/wlbrough.github.io.git" />
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        
+          <link  rel="stylesheet" href="/vendor/siimple/dist/siimple.css" /><link  rel="stylesheet" href="/assets/scss/2f3066c3ccee07f1a21323950cd14459df813c8e.css" /><link  rel="stylesheet" href="/vendor/highlightjs/styles/default.css" />
+        
+
+    </head>
+    <body>
+        <div class="grid">
+          <div class="row">
+            <div class="col-12">
+              <a href="/"><h1>Bill Broughton</h1></a>
+              
+              <div class="social-media">
+                <a href="https://www.github.com/wlbrough" rel="me"><span class="icon-github"><span class="sr-only">Github</span></span></a>
+                <a href="https://www.twitter.com/#!/billtechspring" rel="me"><span class="icon-twitter"><span class="sr-only">Twitter</span></span></a>
+                <a href="https://medium.com/@bill_broughton"><span class="icon-medium"><span class="sr-only">Medium</span></span></a>
+                <a href="https://www.reddit.com/user/techspring/"><span class="icon-reddit"><span class="sr-only">Reddit</span></span></a>
+                <a href="https://getpocket.com/@a81pbTh7A582bdbz41gx600gItdaAbTS14eY8dhd86X5dSZ4dt576R15E00aK66a"><span class="icon-get-pocket"><span class="sr-only">Pocket</span></span></a>
+                <a href="https://open.spotify.com/user/1217545367"><span class="icon-spotify"><span class="sr-only">Spotify</span></span></a>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <div class="post" role="article">
+  <h2 class="post-title">TodoMVC in ember-cli</h2>
+  <h6 class="post-date">4/22/2015</h6>
+
+  <p>A few weeks ago, I decided to jump into Ember.js and try my hand at building a
+fully client-side app. The tutorial on Ember’s site that walks through an
+implementation of TodoMVC is well written and has good depth, but it is somewhat
+outdated. It includes some depricated elements and does not use ember-cli, which
+is the recommended implementation as of the current version.</p>
+<p>As a way to teach myself the new framework and to provide others a good basis
+for starting out, I decided to rework the existing tutorial to bring it up to
+date.</p>
+<p>This tutorial borrows heavily from the original work done by <a href="https://github.com/trek">Trek
+Glowacki</a>.</p>
+<p>Installation directions can be found on the <a href="http://guides.emberjs.com/v1.11.0/ember-cli/">Ember.js
+website</a>.</p>
+<p>The original tutorial can be found on the <a href="http://guides.emberjs.com/v1.10.0/getting-started/planning-the-application/">Ember.js
+website</a>.</p>
+<p>The source for this tutorial is available on
+<a href="https://github.com/wlbrough/ember-cli-todomvc">github</a>.</p>
+<h3 id="create-the-application-skeleton">Create the application skeleton</h3>
+<p>Navigate to the folder that you want to create your project in and execute the
+following.</p>
+<pre><code class="lang-bash">ember new ember-cli-todomvc
+cd ember-cli-todomvc
+ember serve
+</code></pre>
+<p>This will scaffold out the application structure and give you a starting point
+to build on. All bash commands going forward are in the application directory.
+When files are referenced throughout this tutorial, they will be provided with
+the path assuming that the application directory is the base.</p>
+<p><code>ember serve</code> instantates a server that you can access at <code>localhost:4200</code>
+and will watch for changes in the application directory.</p>
+<h3 id="install-todomvc-base">Install TodoMVC base</h3>
+<p>The fine folks at <a href="http://www.todomvc.com/">TodoMVC</a> provide the CSS for the
+application, so we don’t have to build it from scratch.</p>
+<pre><code class="lang-bash">ember install:bower todomvc-app-css
+ember install:bower todomvc-common
+</code></pre>
+<p>All dependencies are added to <code>Brocfile.js</code> before <code>module.exports =
+app.toTree();</code>. You can only import assets from the bower_components and vendor
+directories.</p>
+<pre><code class="lang-javascript">app.import(&#39;bower_components/todomvc-common/base.css&#39;);
+app.import(&#39;bower_components/todomvc-app-css/index.css&#39;);
+</code></pre>
+<h3 id="create-a-static-mockup-of-the-app">Create a static mockup of the app</h3>
+<p>Before adding any code, create a static mockup of the app to
+<code>app/templates/application.hbs</code>. There is no need to add links to the CSS
+files, as that will be handled by Ember’s built-in dependency management.</p>
+<pre><code class="lang-handlebars">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+    &lt;title&gt;Ember.js • TodoMVC&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;section class=&quot;todoapp&quot;&gt;
+      &lt;header class=&quot;header&quot;&gt;
+        &lt;h1&gt;todos&lt;/h1&gt;
+        &lt;input type=&quot;text&quot; class=&quot;new-todo&quot; placeholder=&quot;What needs to be done?&quot; /&gt;
+      &lt;/header&gt;
+
+      &lt;section class=&quot;main&quot;&gt;
+        &lt;ul class=&quot;todo-list&quot;&gt;
+          &lt;li class=&quot;completed&quot;&gt;
+            &lt;input type=&quot;checkbox&quot; class=&quot;toggle&quot;&gt;
+            &lt;label&gt;Learn Ember.js&lt;/label&gt;&lt;button class=&quot;destroy&quot;&gt;&lt;/button&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;input type=&quot;checkbox&quot; class=&quot;toggle&quot;&gt;
+            &lt;label&gt;...&lt;/label&gt;&lt;button class=&quot;destroy&quot;&gt;&lt;/button&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;input type=&quot;checkbox&quot; class=&quot;toggle&quot;&gt;
+            &lt;label&gt;Profit!&lt;/label&gt;&lt;button class=&quot;destroy&quot;&gt;&lt;/button&gt;
+          &lt;/li&gt;
+        &lt;/ul&gt;
+
+        &lt;input type=&quot;checkbox&quot; class=&quot;toggle-all&quot;&gt;
+      &lt;/section&gt;
+
+      &lt;footer class=&quot;footer&quot;&gt;
+        &lt;span class=&quot;todo-count&quot;&gt;
+          &lt;strong&gt;2&lt;/strong&gt; todos left
+        &lt;/span&gt;
+        &lt;ul class=&quot;filters&quot;&gt;
+          &lt;li&gt;
+            &lt;a href=&quot;all&quot; class=&quot;selected&quot;&gt;All&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;a href=&quot;active&quot;&gt;Active&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;a href=&quot;completed&quot;&gt;Completed&lt;/a&gt;
+          &lt;/li&gt;
+        &lt;/ul&gt;
+
+        &lt;button class=&quot;clear-completed&quot;&gt;
+          Clear completed (1)
+        &lt;/button&gt;
+      &lt;/footer&gt;
+    &lt;/section&gt;
+
+    &lt;footer class=&quot;info&quot;&gt;
+      &lt;p&gt;Double-click to edit a todo&lt;/p&gt;
+    &lt;/footer&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>This will be modified throughout the tutorial as features are implemented.</p>
+<h3 id="adding-first-route-and-template">Adding first route and template</h3>
+<p>ember-cli utilizes generators similar to Rails. Generators are called using
+<code>ember generate</code> or <code>ember g</code> for short. This tutorial will use the short
+form.</p>
+<p>The <code>route</code> generator has two options:</p>
+<ul>
+<li><code>type</code> can be either <code>route</code> or <code>resource</code></li>
+<li><code>path</code> which specifies a path other than what can be directly inferred using
+the route name</li>
+</ul>
+<p>A <code>resource</code> does not change the URI, whereas a <code>route</code> does.</p>
+<p>Use the route generator to create a resource at the URI root.</p>
+<pre><code class="lang-bash">ember g route todos --type=resource --path &#39;/&#39;
+</code></pre>
+<p>The generator will create three files:</p>
+<ul>
+<li>app/routes/todos.js</li>
+<li>app/templates/todos.hbs</li>
+<li>tests/unit/routes/todos-test.js</li>
+</ul>
+<p>The generator also modifies <code>app/router.js</code> to reflect the new route/resource.</p>
+<p>Copy all HTML between <code>&lt;body&gt;</code> and <code>&lt;/body&gt;</code> to <code>app/templates/todos.hbs</code>.
+Replace copied HTML in <code>app/templates/application.hbs</code> with <code>{{outlet}}</code>.</p>
+<pre><code class="lang-handlebars">//...
+&lt;body&gt;
+    {{outlet}}
+&lt;/body&gt;
+//...
+</code></pre>
+<h3 id="modeling-data">Modeling data</h3>
+<p>Use the model generator to create a new <code>todo</code> model.</p>
+<pre><code class="lang-bash">ember generate model todo
+</code></pre>
+<p>This will create two new files:</p>
+<ul>
+<li>/app/models/todo.js</li>
+<li>tests/unit/models/todo-test.js</li>
+</ul>
+<p>Modify <code>app/models/todo.js</code> to the following</p>
+<pre><code class="lang-javascript">export default DS.Model.extend({
+    title: DS.attr(&#39;string&#39;),
+    isCompleted: DS.attr(&#39;boolean&#39;)
+});
+</code></pre>
+<h3 id="create-mock-for-fixture-data">Create mock for fixture data</h3>
+<p>Previous versions of Ember used fixtures for mock data. While fixtures are still
+available, it is now recommended that you use http-mock which creates a simple
+Express.js server that will run when you use <code>ember serve</code>.</p>
+<p>http-mock is very simple to setup and use. The generator does most of the work
+for you.</p>
+<pre><code class="lang-bash">ember g http-mock todos
+</code></pre>
+<p>Add the mock data in JSON format between the <code>[]</code> in
+<code>server/mocks/todos.js</code>.</p>
+<pre><code class="lang-json">{
+    id: 1,
+    title: &#39;Learn Ember.js&#39;,
+    isCompleted: true
+},
+{
+    id: 2,
+    title: &#39;...&#39;,
+    isCompleted: false
+},
+{
+    id: 3,
+    title: &#39;Profit!&#39;,
+    isCompleted: false
+}
+</code></pre>
+<p>Use the generator to create a new adapter.</p>
+<pre><code class="lang-bash">ember g adapter application
+</code></pre>
+<p>The adapter will be created at <code>app/adapters/application.js</code>. Open this file
+and modify it to read as follows.</p>
+<pre><code class="lang-javascript">import DS from &#39;ember-data&#39;;
+
+export default DS.RESTAdapter.extend({
+    namespace: &#39;api&#39;
+});
+</code></pre>
+<p>By default, http-mock serves the data from /api/todos, which necessitates the
+namespace.</p>
+<h3 id="displaying-model-data">Displaying model data</h3>
+<p>Now that data is available to the application, the code will be modified to
+display the dynamic data rather than the static mockup.</p>
+<p>To serve the data to the template, we first need to modify
+<code>app/routes/todos.js</code> so it knows what data to pull. Add the following inside
+the <code>extend</code> block.</p>
+<pre><code class="lang-javascript">model: function() {
+    return this.store.find(&#39;todo&#39;);
+}
+</code></pre>
+<p>Now <code>app/templates/todos.hbs</code> can be modified to replace the static <code>&lt;li&gt;</code>
+elements with the Handlebars <code>{{each}}</code> helper.</p>
+<pre><code class="lang-handlebars">//...
+&lt;ul class=&quot;todo-list&quot;&gt;
+    {{#each todo in model}}
+        &lt;li&gt;
+            &lt;input type=&quot;checkbox&quot; class=&quot;toggle&quot;&gt;
+            &lt;label&gt;{{todo.title}}&lt;/label&gt;&lt;button class=&quot;destroy&quot;&gt;&lt;/button&gt;
+        &lt;/li&gt;
+    {{/each}}
+&lt;/ul&gt;
+//...
+</code></pre>
+<p>Because no custom behavior is required from the controller at this point, we can
+rely on the default controller provided by the framework.</p>
+<h3 id="displaying-a-model-s-complete-state">Displaying a model’s complete state</h3>
+<p>TodoMVC uses the <code>completed</code> class to apply a strikethrough to completed
+todos. Modify the <code>&lt;li&gt;</code> element in <code>app/templates/todos.hbs</code> to apply the
+class when a todo’s <code>isCompleted</code> property is true.</p>
+<pre><code class="lang-handlebars">&lt;li {{bind-attr class=&quot;todo.isCompleted:completed&quot;}}&gt;
+</code></pre>
+<h3 id="creating-a-new-model-instance">Creating a new model instance</h3>
+<p>Now that we can display the data, we can make some changes so we can add items
+to the todo list.</p>
+<p>First, replace the <code>input</code> element in <code>apps/templates/todos.hbs</code> with an
+<code>{{input}}</code> helper.</p>
+<pre><code class="lang-handlebars">    &lt;h1&gt;todos&lt;/h1&gt;
+    {{input type=&quot;text&quot; class=&quot;new-todo&quot; placeholder=&quot;What needs to be done?&quot; value=newTitle action=&quot;createTodo&quot;}}
+    //...
+</code></pre>
+<p>The helper binds the <code>newTitle</code> property of the controller to the <code>value</code>
+attribute of the input.</p>
+<p>Next, use the generator to create a <code>todos</code> controller to implement custom
+logic.</p>
+<pre><code class="lang-bash">ember g controller todos
+</code></pre>
+<p>In the newly generated <code>app/controllers/todos.js</code> change
+<code>Ember.Controller.extend</code> to <code>Ember.ArrayController.extend</code> so it will
+handle the array data that we are passing to it.</p>
+<p>Add the following to the extend block</p>
+<pre><code class="lang-javascript">actions: {
+    createTodo: function() {
+        var title = this.get(&#39;newTitle&#39;);
+        if (!title.trim()) { return; }
+
+        var todo = this.store.createRecord(&#39;todo&#39;, {
+            title: title,
+            isCompleted: false
+        });
+
+        this.set(&#39;newTitle&#39;, &#39;&#39;);
+
+        todo.save();
+    }
+}
+</code></pre>
+<p><code>createTodo</code> gets the <code>newTitle</code> property and creates a new todo record
+using the input as the title and setting <code>isCompleted</code> to false. It then
+clears the input and saves the record to the store.</p>
+<h3 id="marking-a-model-as-complete-or-incomplete">Marking a model as complete or incomplete</h3>
+<p>Next up, we will add the ability to mark a todo as complete or incomplete and
+persist the update.</p>
+<p>First, update a<code>pp/templates/todos.hbs</code> by adding an <code>itemController</code> to the
+<code>{{each}}</code> helper. Also, convert the static <code>&lt;input&gt;</code> element to an
+<code>{{input}}</code> helper.</p>
+<pre><code class="lang-handlebars">{{#each todo in model itemController=&quot;todo&quot;}}
+    &lt;li {{bind-attr class=&quot;todo.model.isCompleted:completed&quot;}}&gt;
+        {{input type=&quot;checkbox&quot; checked=todo.model.isCompleted class=&quot;toggle&quot;}}
+        &lt;label &gt;{{todo.model.title}}&lt;/label&gt;&lt;button class=&quot;destroy&quot;&gt;&lt;/button&gt;
+    &lt;/li&gt;
+{{/each}}
+</code></pre>
+<p>Notice that <code>todo.isCompleted</code> has been changed to <code>todo.model.isCompleted</code>.
+This is a result of the way the new todo controller is structured. Ember
+recently depricated the <code>ObjectController</code> class in favor of the easier to
+remember <code>Controller</code> class, which is part of the reason for this change.</p>
+<p>A new controller needs to be created for working with the individual todos. Use
+the generator to create the controller.</p>
+<pre><code class="lang-bash">ember g controller todo
+</code></pre>
+<p>In the <code>extend</code> block of <code>app/controllers/todo.js</code> add this code.</p>
+<pre><code class="lang-javascript">isCompleted: function(key, value) {
+    var model = this.get(&#39;model&#39;);
+
+    if (value === undefined) {
+        return model.get(&#39;isCompleted&#39;);
+    } else {
+        model.set(&#39;isCompleted&#39;, value);
+        model.save();
+        return value;
+    }
+}.property(&#39;model.isCompleted&#39;)
+</code></pre>
+<p>The <code>isCompleted</code> property of the controller is a computed property whose
+value is dependent on the value of the model instance’s <code>isCompleted</code>
+property.</p>
+<p>When called with a value, because the user clicked the checkbox, the controller
+will toggle the model instance’s <code>isCompleted</code> property and persist the
+change. When called without a value, such as on the page load, it will simply
+return the value of the model instance’s <code>isCompleted</code> property.</p>
+<h3 id="displaying-the-number-of-incomplete-todos">Displaying the number of incomplete todos</h3>
+<p>Update <code>app/templates/todos.hbs</code> as shown below.</p>
+<pre><code class="lang-handlebars">&lt;span class=&quot;todo-count&quot;&gt;
+    &lt;strong&gt;{{remaining}}&lt;/strong&gt; {{inflection}} left
+&lt;/span&gt;
+</code></pre>
+<p>Implement the <code>remaining</code> and <code>inflection</code> properties in
+<code>app/controllers/todos.js</code>.</p>
+<pre><code class="lang-javascript">actions: {
+    // ...
+},
+remaining: function() {
+    return this.filterBy(&#39;isCompleted&#39;, false).get(&#39;length&#39;);
+}.property(&#39;@each.isCompleted&#39;),
+inflection: function() {
+    var remaining = this.get(&#39;remaining&#39;);
+    return remaining === 1 ? &#39;item&#39; : &#39;items&#39;;
+}.property(&#39;remaining&#39;)
+</code></pre>
+<p>The <code>remaining</code> property returns the number of todos whose <code>isCompleted</code>
+property is false. Any time the <code>isCompleted</code> property of a todo changes, the
+<code>remaining</code> property will recalculate.</p>
+<p>The <code>inflection</code> property watches the <code>remaining</code> property and will update
+whenever <code>remaining</code> updates. If <code>remaining</code> is 1 the singular will be
+returned, otherwise the plural will be returned.</p>
+<h3 id="toggling-between-showing-and-editing-states">Toggling between showing and editing states</h3>
+<p>TodoMVC allows users to double-click on a todo to edit the title. To implement
+this functionality we will add an <code>isEditing</code> property to the todo controller
+which will be used to class the <code>&lt;li&gt;</code> element and provide an input for
+editing the todo.</p>
+<p>Update <code>app/templates/todos.hbs</code> as follows.</p>
+<pre><code class="lang-handlebars">&lt;ul class=&quot;todo-list&quot;&gt;
+  {{#each todo in model itemController=&quot;todo&quot;}}
+    &lt;li {{bind-attr class=&quot;todo.model.isCompleted:completed todo.model.isEditing:editing&quot;}}&gt;
+      {{#if todo.model.isEditing}}
+        &lt;input class=&quot;edit&quot;&gt;
+      {{else}}
+        {{input type=&quot;checkbox&quot; checked=todo.model.isCompleted class=&quot;toggle&quot;}}
+        &lt;label {{action &quot;editTodo&quot; on=&quot;doubleClick&quot;}}&gt;{{todo.model.title}}&lt;/label&gt;&lt;button class=&quot;destroy&quot;&gt;&lt;/button&gt;
+      {{/if}}
+    &lt;/li&gt;
+  {{/each}}
+&lt;/ul&gt;
+</code></pre>
+<p>In <code>app/controllers/todo.js</code> add an <code>editTodo</code> action and an <code>isEditing</code>
+property.</p>
+<pre><code class="lang-javascript">actions: {
+  editTodo: function() {
+    this.set(&#39;isEditing&#39;, true);
+  },
+  isEditing: false,
+  //...
+}
+</code></pre>
+<p>This provides the <code>editTodo</code> method which switches the <code>isEditing</code> property
+to true. Now when you double-click on a todo, you are provided a blank input.
+Not quite what we are looking for.</p>
+<h3 id="accepting-edits">Accepting edits</h3>
+<p>Now that we have an input, we need to make it functional. Now we will add the
+logic to focus on the input when it is visible, accept user input, and persist
+changes when the user presses <code>Enter</code>.</p>
+<p>Generate a component which will be a modified implementation of a text field.</p>
+<pre><code class="lang-bash">ember g component edit-todo
+</code></pre>
+<p>Modify the newly generated <code>app/components/edit-todo.js</code> to match the
+following.</p>
+<pre><code class="lang-javascript">//...
+export default Ember.TextField.extend({
+  didInsertElement: function() {
+    this.$().focus();
+  }
+});
+</code></pre>
+<p>This automatically focuses on the element when it is inserted into the page.</p>
+<p>Next, replace the static <code>input</code> element with the <code>{{edit-todo}}</code> component
+in <code>app/templates/todos.hbs</code>.</p>
+<pre><code class="lang-handlebars">{{#if todo.model.isEditing}}
+  {{edit-todo class=&quot;edit&quot; value=todo.model.title focus-out=&quot;acceptChanges&quot; insert-newline=&quot;acceptChanges&quot;}}
+{{else}}
+</code></pre>
+<p>The method <code>acceptChanges</code> will be called if the user presses <code>Enter</code> or
+otherwise takes focus away from the input. The <code>value</code> of the input is bound
+to the <code>title</code> property of the model instance.</p>
+<p>Finally, the <code>acceptChanges</code> method needs to be added to
+<code>app/controllers/todo.js</code>.</p>
+<pre><code class="lang-javascript">//...
+editTodo: function() {
+  this.model.set(&#39;isEditing&#39;, true);
+},
+acceptChanges: function() {
+  this.model.set(&#39;isEditing&#39;, false);
+
+  if (Ember.isEmpty(this.model.get(&#39;title&#39;))) {
+    this.send(&#39;removeTodo&#39;);
+  } else {
+    this.get(&#39;model&#39;).save();
+  }
+}
+//...
+</code></pre>
+<h3 id="deleting-a-model">Deleting a model</h3>
+<p>Update the static <code>&lt;button&gt;</code> element in <code>app/templates/todos.hbs</code> to use an
+action called <code>removeTodo</code>.</p>
+<pre><code class="lang-handlebars">&lt;button {{action &quot;removeTodo&quot;}} class=&quot;destroy&quot;&gt;&lt;/button&gt;
+</code></pre>
+<p>Add the <code>removeTodo</code> method to <code>app/controllers/todo.js</code>.</p>
+<pre><code class="lang-javascript">//...
+acceptChanges: function() {
+  this.model.set(&#39;isEditing&#39;, false);
+
+  if (Ember.isEmpty(this.model.get(&#39;title&#39;))) {
+    this.send(&#39;removeTodo&#39;);
+  } else {
+    this.get(&#39;model&#39;).save();
+  }
+},
+removeTodo: function() {
+  var todo = this.get(&#39;model&#39;);
+  todo.deleteRecord();
+  todo.save();
+}
+//...
+</code></pre>
+<h3 id="adding-child-routes">Adding child routes</h3>
+<p>Adding child routes to the <code>todos</code> resource in the router will allow
+implementation of the filtered <code>Active</code> and <code>Completed</code> views that are
+linked at the bottom of the list. Use the generator to create a new <code>index</code>
+route within the <code>todos</code> resource.</p>
+<pre><code class="lang-bash">ember g route todos/index
+</code></pre>
+<p>In addition to the route, the generator also gives us
+<code>app/templates/todos/index.hbs</code>. Move the entire todo list <code>&lt;ul&gt;</code> block to
+this file and replace it with <code>{{outlet}}</code> in <code>app/templates/todos.hbs</code>.</p>
+<pre><code class="lang-handlebars">&lt;section class=&quot;main&quot;&gt;
+  {{outlet}}
+
+  &lt;input type=&quot;checkbox&quot; class=&quot;toggle-all&quot;&gt;
+&lt;/section&gt;
+</code></pre>
+<p>Add the following to the <code>extend</code> block in <code>app/routes/todos/index.js</code>.</p>
+<pre><code class="lang-javascript">model: function() {
+  return this.modelFor(&#39;todos&#39;);
+}
+</code></pre>
+<h3 id="transitioning-to-show-only-incomplete-todos">Transitioning to show only incomplete todos</h3>
+<p>Create a new <code>active</code> route within the <code>todos</code> resource using the generator.</p>
+<pre><code class="lang-bash">ember g route todos/active
+</code></pre>
+<p>This route will use the <code>todos</code> model with a filter applied. It will also
+render in the <code>todos/index</code> template that was created earlier. Add the
+following to <code>app/routes/todos/active.js</code>.</p>
+<pre><code class="lang-javascript">model: function() {
+  return this.store.filter(&#39;todo&#39;, function(todo) {
+    return !todo.get(&#39;isCompleted&#39;);
+  });
+},
+renderTemplate: function(controller) {
+  this.render(&#39;todos/index&#39;, {controller: controller});
+}
+</code></pre>
+<p>The model function returns todos with the <code>isCompleted</code> property equal to
+false.</p>
+<p>Modify <code>app/templates/todos.hbs</code> to replace the <code>Active</code> link with a
+<code>{{link-to}}</code> helper.</p>
+<pre><code class="lang-handlebars">&lt;li&gt;
+  &lt;a href=&quot;all&quot;&gt;All&lt;/a&gt;
+&lt;/li&gt;
+&lt;li&gt;
+  {{#link-to &quot;todos.active&quot; activeClass=&quot;selected&quot;}}Active{{/link-to}}
+&lt;/li&gt;
+&lt;li&gt;
+  &lt;a href=&quot;completed&quot;&gt;Completed&lt;/a&gt;
+&lt;/li&gt;
+</code></pre>
+<h3 id="transitioning-to-show-only-completed-todos">Transitioning to show only completed todos</h3>
+<p>Create a new <code>completed</code> route within the <code>todos</code> resource using the
+generator.</p>
+<pre><code class="lang-bash">ember g route todos/completed
+</code></pre>
+<p>Add the following to <code>app/routes/todos/completed.js</code>.</p>
+<pre><code class="lang-javascript">model: function() {
+  return this.store.filter(&#39;todo&#39;, function(todo) {
+    return todo.get(&#39;isCompleted&#39;);
+  });
+},
+renderTemplate: function(controller) {
+  this.render(&#39;todos/index&#39;, {controller: controller});
+}
+</code></pre>
+<p>Modify<code>app/templates/todos.hbs</code> to replace the <code>Completed</code> link with a
+<code>{{link-to}}</code> helper.</p>
+<pre><code class="lang-handlebars">&lt;li&gt;
+  &lt;a href=&quot;all&quot;&gt;All&lt;/a&gt;
+&lt;/li&gt;
+&lt;li&gt;
+  {{#link-to &quot;todos.active&quot; activeClass=&quot;selected&quot;}}Active{{/link-to}}
+&lt;/li&gt;
+&lt;li&gt;
+  {{#link-to &quot;todos.completed&quot; activeClass=&quot;selected&quot;}}Completed{{/link-to}}
+&lt;/li&gt;
+</code></pre>
+<h3 id="transitioning-back-to-show-all-todos">Transitioning back to show all todos</h3>
+<p>Modify <code>app/templates/todos.hbs</code> to replace the <code>All</code> link with a
+<code>{{link-to}}</code> helper.</p>
+<pre><code class="lang-handlebars">&lt;li&gt;
+  {{#link-to &quot;todos.index&quot; activeClass=&quot;selected&quot;}}All{{/link-to}}
+&lt;/li&gt;
+&lt;li&gt;
+  {{#link-to &quot;todos.active&quot; activeClass=&quot;selected&quot;}}Active{{/link-to}}
+&lt;/li&gt;
+&lt;li&gt;
+  {{#link-to &quot;todos.completed&quot; activeClass=&quot;selected&quot;}}Completed{{/link-to}}
+&lt;/li&gt;
+</code></pre>
+<h3 id="displaying-a-button-to-remove-all-completed-todos">Displaying a button to remove all completed todos</h3>
+<p>TodoMVC allows users to remove all todos that have been marked as completed with
+a button click. In <code>app/templates/todos.js</code> update the static <code>&lt;button&gt;</code>
+element with an <code>{{action}}</code>.</p>
+<pre><code class="lang-handlebars">{{#if hasCompleted}}
+  &lt;button class=&quot;clear-completed&quot; {{action &quot;clearCompleted&quot;}}&gt;
+    Clear completed ({{completed}})
+  &lt;/button&gt;
+{{/if}}
+</code></pre>
+<p><code>app/controllers/todos.js</code> needs to be updated to add the <code>hasCompleted</code> and
+<code>completed</code> properties as well as the <code>clearCompleted</code> method.</p>
+<pre><code class="lang-javascript">actions: {
+  clearCompleted: function() {
+    var completed = this.filterBy(&#39;isCompleted&#39;, true);
+    completed.invoke(&#39;deleteRecord&#39;);
+    completed.invoke(&#39;save&#39;);
+  },
+  //...
+},
+hasCompleted: function() {
+  return this.get(&#39;completed&#39;) &gt; 0;
+}.property(&#39;completed&#39;),
+completed: function() {
+  return this.filterBy(&#39;isCompleted&#39;, true).get(&#39;length&#39;);
+}.property(&#39;@each.isCompleted&#39;),
+//...
+</code></pre>
+<p><code>filterBy</code> returns an <code>EmberArray</code> object which contains only items that
+return true. The invoke method is part of the EmberArray API and executes a
+method on each object in the array.</p>
+<h3 id="indicating-when-all-todos-are-complete">Indicating when all todos are complete</h3>
+<p>Update the static checkbox in <code>app/templates/todos.hbs</code>. This checkbox will
+indicate when all todos are complete.</p>
+<pre><code class="lang-handlebars">&lt;section class=&quot;main&quot;&gt;
+  {{outlet}}
+  {{input type=&quot;checkbox&quot; class=&quot;toggle-all&quot; checked=allAreDone}}
+&lt;/section&gt;
+</code></pre>
+<p>This checkbox will be checked when <code>allAreDone</code> is true. Implement
+<code>allAreDone</code> in <code>app/controllers/todos.js</code>.</p>
+<pre><code class="lang-javascript">allAreDone: function(key, value) {
+  return !!this.get(&#39;length&#39;) &amp;&amp; this.isEvery(&#39;isCompleted&#39;);
+}.property(&#39;@each.isCompleted&#39;)
+</code></pre>
+<h3 id="toggling-all-todos-between-complete-and-incomplete">Toggling all todos between complete and incomplete</h3>
+<p>The checkbox that was just implemented is useful, but it would be much more
+useful if it could toggle all of the todos between complete and incomplete.</p>
+<p>To implement this, modify <code>allAreDone</code> in <code>app/controllers/todos.js</code>.</p>
+<pre><code class="lang-javascript">allAreDone: function(key, value) {
+  if (value === undefined) {
+    return !!this.get(&#39;length&#39;) &amp;&amp; this.isEvery(&#39;isCompleted&#39;);
+  } else {
+    this.setEach(&#39;isCompleted&#39;, value);
+    this.invoke(&#39;save&#39;);
+    return value;
+  }
+}.property(&#39;@each.isCompleted&#39;)
+</code></pre>
+<h3 id="replacing-http-mock-with-localstorage">Replacing HTTP-Mock with localStorage</h3>
+<p>Adapters are easily swapped without affecting the overall application. Now that
+the application is complete, we will add a localStorage adapter, so the
+information can be persisted outside the session without a server.</p>
+<p>Install the localStorage adapter and create a serializer to manage stringifying
+the JSON data for storage.</p>
+<pre><code class="lang-bash">ember install:bower ember-localstorage-adapter
+ember g serializer application
+</code></pre>
+<p>Go to <code>Brocfile.js</code> and add the following below the CSS imports which will
+include the adapter logic as a dependency.</p>
+<pre><code class="lang-javascript">app.import(&#39;bower_components/ember-localstorage-adapter/localstorage_adapter.js&#39;);
+</code></pre>
+<p>Now we need to make the application aware that we are using localStorage rather
+than REST.</p>
+<p>Open <code>app/serializers/application.js</code> and change <code>RESTSerializer</code> to
+<code>LSSerializer</code>.</p>
+<p>Open <code>app/adapters/application.js</code> and change <code>RESTAdapter</code> to
+<code>LSAdapter</code>.</p>
+
+</div>
+            </div>
+          </div>
+        </div>
+
+        
+          <script defer="defer"  src="/vendor/highlightjs/highlight.pack.js"></script>
+        
+
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-74342109-3', 'auto');
+          ga('send', 'pageview');
+        </script>
+    </body>
+</html>

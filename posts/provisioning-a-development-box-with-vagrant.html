@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Provisioning a Development Box with Vagrant | Bill Broughton</title>
+        <meta name="author" content="Bill Broughton" />
+        <meta name="copyright" content="&copy; Bill Broughton 2016">
+        <meta name="description" content="My personal website for projects and writing.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <meta property="og:description" content="My personal website for projects and writing." />
+        <meta property="og:url" content="http://www.billbroughton.me" />
+        <meta property="og:site_name" content="Bill Broughton" />
+        <meta property="og:title" content="Bill Broughton" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="http://www.billbroughton.me/assets/img/avatar.jpg" />
+        <meta property="og:image:type" content="image/jpg" />
+        <meta property="og:image:width" content="400" />
+        <meta property="og:image:height" content="400" />
+
+        <!-- Twitter: card tags -->
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@billtechspring" />
+        <meta name="twitter:title" content="Bill Broughton">
+        <meta name="twitter:description" content="My personal website for projects and writing.">
+        <meta name="twitter:image" content="http://www.billbroughton.me/assets/img/avatar.jpg">
+
+        <!-- Open Source Protocol -->
+        <link rel="profile" href="http://osprotocol.com" />
+        <meta property="os:repo" content="https://github.com/wlbrough/wlbrough.github.io" />
+        <meta property="os:rcs_type" content="git" />
+        <meta property="os:src" content="git@github.com:wlbrough/wlbrough.github.io.git" />
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        
+          <link  rel="stylesheet" href="/vendor/siimple/dist/siimple.css" /><link  rel="stylesheet" href="/assets/scss/2f3066c3ccee07f1a21323950cd14459df813c8e.css" /><link  rel="stylesheet" href="/vendor/highlightjs/styles/default.css" />
+        
+
+    </head>
+    <body>
+        <div class="grid">
+          <div class="row">
+            <div class="col-12">
+              <a href="/"><h1>Bill Broughton</h1></a>
+              
+              <div class="social-media">
+                <a href="https://www.github.com/wlbrough" rel="me"><span class="icon-github"><span class="sr-only">Github</span></span></a>
+                <a href="https://www.twitter.com/#!/billtechspring" rel="me"><span class="icon-twitter"><span class="sr-only">Twitter</span></span></a>
+                <a href="https://medium.com/@bill_broughton"><span class="icon-medium"><span class="sr-only">Medium</span></span></a>
+                <a href="https://www.reddit.com/user/techspring/"><span class="icon-reddit"><span class="sr-only">Reddit</span></span></a>
+                <a href="https://getpocket.com/@a81pbTh7A582bdbz41gx600gItdaAbTS14eY8dhd86X5dSZ4dt576R15E00aK66a"><span class="icon-get-pocket"><span class="sr-only">Pocket</span></span></a>
+                <a href="https://open.spotify.com/user/1217545367"><span class="icon-spotify"><span class="sr-only">Spotify</span></span></a>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <div class="post" role="article">
+  <h2 class="post-title">Provisioning a Development Box with Vagrant</h2>
+  <h6 class="post-date">6/4/2015</h6>
+
+  <p>I try to automate just about every repetitive thing that I do on a computer.
+Seriously, it’s bordering on being a disorder. I just hate spending hours doing
+the same thing over and over again that a computer can do in minutes while I go
+make a cup of coffee.</p>
+<p>Vagrant is perfect for me then, because it allows me to set up a consistent,
+repeatable development environment once and then boot into a clean version
+whenever I want within minutes. It’s a little more work up front, but it really
+pays off in the long run.</p>
+<h3 id="what-are-we-doing-here-">What are we doing here?</h3>
+<p>I’m going to walk through the process of creating the necessary files to
+automatically provision fresh development environments using Vagrant. For this
+example, I’m going to set up a LAMP stack along with a bunch of development
+tooling. It will be called, rather unimaginatively, vagrant-lamp-dev. You can
+find all of the files in my <a href="https://github.com/wlbrough/vagrant-lamp-dev">github repo</a>.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>In order to follow along, you’ll need a few things. If you don’t already have
+this stuff installed on your system, follow the instructions at the provided
+links to get it installed.</p>
+<ul>
+<li>Virtualbox (<a href="https://www.virtualbox.org/wiki/Downloads">download</a>)</li>
+<li>Vagrant (<a href="http://www.vagrantup.com/downloads">download</a>)</li>
+<li>Vagrant-HostsUpdater (<a href="https://github.com/cogitatio/vagrant-hostsupdater">github</a>) (<strong>optional</strong>)</li>
+</ul>
+<h3 id="vagrantfile">Vagrantfile</h3>
+<p>The Vagrantfile is where you set up the basic aspects of the virtual machine.
+This is where you define things such as what base box to use, the system
+resources for the VM, host name, etc.</p>
+<p>The basic structure of the Vagrantfile will (almost) always be</p>
+<pre><code class="lang-ruby">Vagrant.configure(“2”) do |config|
+  # Config goes here
+end
+</code></pre>
+<p>The only exception to that is if you are trying to do some configuration that
+needs to be compatible with early versions of Vagrant in which case you would
+need a “1” instead of the “2”. This is just a block that contains your
+configuration settings.</p>
+<p>The first thing that I will do is specify the base box that my environment will
+be provisioned on top of. In this case, I will specify Ubuntu 14.04 Server
+64-bit. You can find a list of available boxes on the <a href="https://atlas.hashicorp.com/boxes/search">Hashi Corp website</a>.</p>
+<pre><code class="lang-ruby">config.vm.box = &quot;ubuntu/trusty64&quot;
+</code></pre>
+<p>Next we’ll set up the hostname and networking for the VM.</p>
+<pre><code class="lang-ruby">config.vm.hostname = &quot;vagrant-lamp-dev&quot;
+config.vm.network :private_network, ip: &quot;192.168.40.7&quot;
+config.hostsupdater.aliases = %w(lamp.dev)
+config.hostsupdater.remove_on_suspend = true
+</code></pre>
+<p>The first line in this block just sets the hostname to “vagrant-lamp-dev”. The
+next line configures a private network IP address. Why did I choose
+“192.168.40.7”? Because there’s nothing else on my network with that IP address.
+Your mileage may vary. It is possible to configure a public network IP address
+that would allow access from other devices on your network, but I’ll assume
+that’s not a desired behavior here.</p>
+<p>If you have Vagrant-HostsUpdater installed, the next two lines configure an
+entry to your local machine’s hosts file so that when you enter vagrant.wp into
+a browser, you will be directed to the configured IP address. The
+remove_on_suspend setting removes the hosts file entry each time you exit the
+VM.</p>
+<p>Next, we’ll configure some settings for the VM.</p>
+<pre><code class="lang-ruby">config.vm.provider :virtualbox do |v|
+  v.customize [&quot;modifyvm&quot;, :id, &quot;--memory&quot;, 1024]
+  v.customize [&quot;modifyvm&quot;, :id, &quot;--natdnshostresolver1&quot;, &quot;on&quot;]
+  v.customize [&quot;modifyvm&quot;, :id, &quot;--natdnsproxy1&quot;, &quot;on&quot;]
+end
+</code></pre>
+<p>The first line here just sets up the block for the Virtualbox specific config
+settings. The first line inside the block specifies a memory allocation of 1Gb.
+The next two lines in the config are used to resolve slow network issues and are
+pretty much boilerplate in Vagrantfiles.</p>
+<p>Finally, lets specify where to look for the provisioning file that will do the
+rest of the work. I will be using the shell provisioning method, but you can get
+more advanced and use Puppet or Chef also. For this exercise I will add a file
+called bootstrap.sh to the same directory as the Vagrantfile.</p>
+<pre><code class="lang-ruby">config.vm.provision :shell, :path =&gt; &quot;bootstrap.sh&quot;
+</code></pre>
+<p>That’s it! Now you have a fully functioning Vagrantfile. Next up is the
+interesting stuff.</p>
+<h3 id="bootstrap-sh">bootstrap.sh</h3>
+<p>To borrow an expression from the MTV masterpiece “Cribs”, this is where the
+magic happens. This is just a shell script that gets run after the VM is set up.
+I’m going to keep it relatively simple here, but it would be wise to use
+conditionals throughout to skip redundant operations if you re-provision at some
+point after you first build the VM.</p>
+<p>The first thing I want to do is install a bunch of packages to provide the
+functionality that I need.</p>
+<pre><code class="lang-bash">apt_package_list = (
+ # lots of packages — see [github](https://github.com/wlbrough/vagrant-lamp-dev)
+)
+apt-get update --assume-yes
+apt-get install --assume-yes ${apt_package_list[@]}
+apt-get clean
+</code></pre>
+<p>First we build an array of all of the packages that we want to install. It’s a
+pretty extensive list, so I’ve left it out from this article. Next we update the
+package lists, install all of the packages in the array, then clean up the apt
+cache.</p>
+<p>Make sure npm is up to date and install the npm update checker.</p>
+<pre><code class="lang-bash">npm install -g npm
+npm install -g npm-check-updates
+</code></pre>
+<p>I use Bower, so that’s next up on the list.</p>
+<pre><code class="lang-bash">npm install -g bower
+</code></pre>
+<p>I’m a recent Gulp convert, so Gulp and all of the typical plugins I use are
+coming up next.</p>
+<pre><code class="lang-bash">npm install -g gulp
+npm install -g gulp-util
+npm install -g gulp-sass
+npm install -g gulp-autoprefixer
+npm install -g gulp-coffee
+...(continues)
+</code></pre>
+<p>That’s it! Now everything is in place to launch the VM.</p>
+<h3 id="launch">Launch</h3>
+<p>Now <code>cd</code> into the directory with the Vagrantfile and run</p>
+<pre><code class="lang-bash">vagrant up
+</code></pre>
+<p>This would be a good time to go get a coffee and a snack or deal with your email
+backlog. There is a lot of downloading and installing to be done, so it will
+take a while.</p>
+<p>When everything is done, you will be able to navigate to <code>http://lamp.dev/</code> and
+see the Apache default page in your browser. You can ssh into the VM with the
+command</p>
+<pre><code class="lang-bash">vagrant ssh
+</code></pre>
+<h3 id="fin">Fin</h3>
+<p>There’s a lot more to Vagrant than what was covered here. I would recommend
+looking through the docs on the <a href="http://www.vagrantup.com/">Vagrant website</a> and
+playing around with other features. Happy coding!</p>
+
+</div>
+            </div>
+          </div>
+        </div>
+
+        
+          <script defer="defer"  src="/vendor/highlightjs/highlight.pack.js"></script>
+        
+
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-74342109-3', 'auto');
+          ga('send', 'pageview');
+        </script>
+    </body>
+</html>
